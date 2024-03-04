@@ -1,0 +1,41 @@
+---
+title: "data test"
+output: html_document
+date: "2024-03-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r message=FALSE, warning=FALSE}
+library("tidyverse")
+library("janitor")
+library("naniar")
+library("lubridate")
+library("readxl")
+library("rio")
+```
+
+
+```{r}
+read_csv("data/bicycle-fatality-and-injury-data-by-county.csv") #bike injury data, part of vehicle crash data set
+```
+```{r}
+read_csv("data/samples_geocoded.csv") #supposed to be microplastics data but for some reason only has websites, https://catalog.data.gov/dataset/microplastics-in-drinking-water
+```
+```{r}
+read_csv("data/Visits_to_physician_offices__hospital_outpatient_departments__and_hospital_emergency_departments__by_age__sex__and_race__United_States.csv") #visits to hospital, way too confusing
+```
+
+```{r}
+read_csv("data/travel-and-crash-summary-for-county.csv") #car crashes by county, https://catalog.data.gov/dataset/2021-crash-data-on-state-highway-system
+```
+```{r}
+read_csv("data/odp_idb_2001_2022_ddg_compliant.csv") #infectious disease by county, https://catalog.data.gov/dataset/infectious-diseases-by-disease-county-year-and-sex-d8912
+```
+```{r}
+#https://catalog.data.gov/dataset/1987-2018-cyanobacteria-and-water-quality-data-for-20-reservoirs is cyanobacteria data but this seems way too long
+```
+
