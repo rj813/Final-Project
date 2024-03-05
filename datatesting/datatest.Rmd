@@ -20,7 +20,7 @@ library("rio")
 
 
 ```{r}
-read_csv("data/bicycle-fatality-and-injury-data-by-county.csv") #bike injury data, part of vehicle crash data set
+bike_crashes <- read_csv("data/bicycle-fatality-and-injury-data-by-county.csv") #bike injury data, part of vehicle crash data set
 ```
 ```{r}
 read_csv("data/samples_geocoded.csv") #supposed to be microplastics data but for some reason only has websites, https://catalog.data.gov/dataset/microplastics-in-drinking-water
@@ -30,8 +30,14 @@ read_csv("data/Visits_to_physician_offices__hospital_outpatient_departments__and
 ```
 
 ```{r}
-read_csv("data/travel-and-crash-summary-for-county.csv") #car crashes by county, https://catalog.data.gov/dataset/2021-crash-data-on-state-highway-system
+car_crashes <- read_csv("data/travel-and-crash-summary-for-county.csv") #car crashes by county, https://catalog.data.gov/dataset/2021-crash-data-on-state-highway-system
 ```
+#Finding all of the counties
+```{r}
+
+```
+
+
 ```{r}
 read_csv("data/odp_idb_2001_2022_ddg_compliant.csv") #infectious disease by county, https://catalog.data.gov/dataset/infectious-diseases-by-disease-county-year-and-sex-d8912
 ```

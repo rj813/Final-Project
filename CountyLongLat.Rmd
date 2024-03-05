@@ -1,0 +1,23 @@
+---
+title: "County Coordinate Data"
+output: html_document
+date: "2024-03-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load the Libraries
+```{r}
+library(tidyverse)
+library(tabyl)
+```
+
+```{r}
+bike_crashes <- read_csv("datatesting/data/bicycle-fatality-and-injury-data-by-county.csv") #bike injury data, part of vehicle crash data set
+```
+
+```{r}
+
+```
