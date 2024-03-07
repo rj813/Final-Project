@@ -11,6 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 #Load the Libraries
 ```{r}
 library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(shiny)
+library(shinydashboard)
 ```
 
 ```{r}
@@ -25,7 +29,7 @@ str(bike_crashes)
 levels(bike_crashes$County)
 ```
 ```{r}
-# Create a data frame with the county names, latitudes, and longitudes
+# Created a data frame with the county names, latitudes, and longitudes using the help of ChatGPT
 county_data <- data.frame(
   county = c("ALAMEDA", "ALPINE", "AMADOR", "BUTTE", "CALAVERAS", "COLUSA", "CONTRA COSTA", "DEL NORTE",
              "EL DORADO", "FRESNO", "GLENN", "HUMBOLDT", "IMPERIAL", "INYO", "KERN", "KINGS",
@@ -54,4 +58,5 @@ county_data <- data.frame(
 # Print the data frame with county, latitude, and longitude
 print(county_data)
 ```
+
 
