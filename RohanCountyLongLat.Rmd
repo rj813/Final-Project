@@ -59,4 +59,30 @@ county_data <- data.frame(
 print(county_data)
 ```
 
+# Which county has the highest fatality:crash ratio?
+```{r}
+# Calculate the fatality to crash ratio
+bike_crashes$fatality_ratio <- bike_crashes$Fatality / bike_crashes$Total
+
+# Find the county with the highest fatality:crash ratio
+county_highest_ratio <- bike_crashes$County[which.max(bike_crashes$fatality_ratio)]
+
+# Print the county with the highest fatality:crash ratio
+print(county_highest_ratio)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
