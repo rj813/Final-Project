@@ -23,44 +23,14 @@ library("readxl")
 ```
 
 
+
+### loading data - Ryan
 ```{r}
-xl <- import_list("Sorghum_DATA_Final - cópia.xlsx") #returns each excel sheet as a list
-xl <- clean_names(xl)
+county_pop <- read.csv("datatesting/data/county_populations.csv")
+bike_crashes <- read.csv("datatesting/data/bicycle-fatality-and-injury-data-by-county.csv")
+car_crashes <- read.csv("datatesting/data/travel-and-crash-summary-for-county.csv")
+county_coordinates <- read_excel("datatesting/data/us-county-boundaries.xlsx")
 ```
-
-```{r}
-xl
-```
-
-
-```{r}
-xl_plant <- rename(xl$plant_height, "Line" = "Mutant Line") #first column for plant height is named mutant line instead of line like all others data frames
-```
-
-```{r}
-xl2 <- left_join(xl_plant, xl$days_to_heading) #adds days to heading column to plant height so they appear in the same table
-xl3 <- left_join(xl2, xl$panicle_weight) #adds panicle weight column to the previous table
-xl3
-```
-
-```{r}
-sorghum <- xl3 %>%
-mutate_at("Line", str_replace, "Mutant_Sorghum_", "") #finalizes the data as sorghum by getting rid of the mutant_sorghum_ text in the line column
-```
-
-```{r}
-sorghum <- clean_names(sorghum) #cleans names
-```
-
-```{r}
-sorghum <- sorghum %>%
-  mutate(line = as.factor(line))  #converts character class for line to factor class
-```
-
-```{r}
-sorghum #this is what cleaned data looks like
-```
-
 
 
 
