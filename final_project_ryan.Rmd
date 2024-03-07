@@ -1,0 +1,22 @@
+---
+title: "final_project_ryan"
+output: html_document
+date: "2024-03-07"
+---
+
+## Which type of road leads to the most injuries, what about fatalities? (RYAN)
+## Which county has highest bike crash per CAP? (RYAN)
+## Which county has highest fatalities per CAP?  (RYAN)
+
+```{r}
+... %>% 
+  group_by(#highway type) %>% 
+  summarise(highest_injury_by_road == sum(injury)) %>% 
+    arrange(desc=T)
+```
+
+```{r}
+... %>% 
+  
+```
+
