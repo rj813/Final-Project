@@ -71,6 +71,10 @@ county_highest_ratio <- bike_crashes$County[which.max(bike_crashes$fatality_rati
 print(county_highest_ratio)
 ```
 
+```{r}
+clean_names(county_data)
+write.csv(county_data, "datatesting/data/county_data.csv", row.names = F) #kevin
+```
 
 
 

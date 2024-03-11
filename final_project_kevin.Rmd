@@ -1,0 +1,66 @@
+---
+title: "final_project_kevin"
+output: html_document
+date: "2024-03-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+bikes <- read_csv("datatesting/data/bicycle-fatality-and-injury-data-by-county.csv")
+bikes <- clean_names(bikes) #names were upper case before
+```
+
+```{r}
+county_data <- read_csv("datatesting/data/county_data.csv")
+```
+```{r}
+county_data
+```
+```{r}
+bikes
+```
+
+```{r}
+bikes_new <- full_join(bikes, county_data)
+```
+```{r}
+pop <- read_csv("datatesting/data/county_populations.csv")
+```
+```{r}
+pop #found that county names do not match so asked chatgpt to fix county names
+```
+
+```{r}
+updated_pop <- read_csv("datatesting/data/updated_county_populations.csv")
+```
+```{r}
+updated_pop <- updated_pop %>%
+  filter(county != "CALIFORNIA") #data has total pop which we dont need
+```
+
+```{r}
+bikes_new <- full_join(bikes_new, updated_pop)
+```
+```{r}
+bikes_new #population and year names are wrong
+```
+
+```{r}
+bikes_new <- bikes_new %>%
+  rename(year ="population")%>%
+  rename(pop = "population.1")
+```
+
+```{r}
+bikes_new
+```
+
