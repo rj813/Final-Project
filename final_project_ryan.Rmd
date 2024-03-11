@@ -75,7 +75,9 @@ bikes_new %>%
   summarise(highest_injury_by_road = sum(injury)) %>% 
     arrange(desc=T) %>% 
   filter(highway_type != "TOTAL") %>% 
-ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = .7) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries")
+ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = .7) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        plot.title = element_text(size = 14))
 ```
 ## plot for highest bike fatality per capita
 ```{r}
