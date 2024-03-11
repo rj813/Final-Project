@@ -9,15 +9,103 @@ date: "2024-03-07"
 ## Which county has highest fatalities per CAP?  (RYAN)
 
 ```{r}
-... %>% 
-  group_by(#highway type) %>% 
-  summarise(highest_injury_by_road == sum(injury)) %>% 
-    arrange(desc=T)
+library(dplyr)
+library(tidyverse)
+library(janitor)
 ```
 
 ```{r}
-... %>% 
-  
+bikes <- read_csv("datatesting/data/bicycle-fatality-and-injury-data-by-county.csv")
+bikes <- clean_names(bikes) #names were upper case before
 ```
 
-hhd
+```{r}
+county_data <- read_csv("datatesting/data/county_data.csv")
+```
+```{r}
+county_data
+```
+```{r}
+bikes
+```
+
+```{r}
+bikes_new <- full_join(bikes, county_data)
+```
+```{r}
+pop <- read_csv("datatesting/data/county_populations.csv")
+```
+```{r}
+pop #found that county names do not match so asked chatgpt to fix county names
+```
+
+```{r}
+updated_pop <- read_csv("datatesting/data/updated_county_populations.csv")
+```
+```{r}
+updated_pop <- updated_pop %>%
+  filter(county != "CALIFORNIA") #data has total pop which we dont need
+```
+
+```{r}
+bikes_new <- full_join(bikes_new, updated_pop)
+```
+```{r}
+bikes_new #population and year names are wrong
+```
+
+```{r}
+bikes_new <- bikes_new %>%
+  rename(year ="population")%>%
+  rename(pop = "population.1")
+```
+
+```{r}
+bikes_new
+```
+
+
+
+
+
+### finding what highway type has the highest numabr of injuries
+```{r}
+bikes_new %>% 
+  group_by(highway_type) %>% 
+  summarise(highest_injury_by_road = sum(injury)) %>% 
+    arrange(desc=T) %>% 
+  filter(highway_type != "TOTAL") %>% 
+ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = .7) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries")
+```
+## plot for highest bike fatality per capita
+```{r}
+bikes_new %>% 
+  mutate(death_per_cap = fatality/pop) %>% 
+  arrange(desc(death_per_cap)) %>% 
+  filter(highway_type == "TOTAL") %>% 
+  head(death_per_cap, n=5) %>% 
+ ggplot(aes(county,death_per_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatality per Capita by County", x= "County", y= "Fatality per Capita")
+```
+## highest crash rate per county
+```{r}
+bikes_new %>% 
+  mutate(total_per_cap = total/pop) %>% 
+  arrange(desc(total_per_cap)) %>% 
+  filter(highway_type == "TOTAL") %>% 
+  head(total_per_cap, n=5) %>% 
+ ggplot(aes(county,total_per_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Crashes per Capita by County", x= "County", y= "Crashes per Capita")
+```
+
+### highest fatality per crash by county
+
+```{r}
+bikes_new %>% 
+  mutate(total_per_cap = total/pop) %>% 
+  mutate(death_per_cap = fatality/pop) %>% 
+  mutate(death_per_crash_cap = death_per_cap/total_per_cap) %>% 
+  arrange(desc(death_per_crash_cap)) %>% 
+  filter(highway_type == "TOTAL") %>% 
+  head(death_per_crash_cap, n=5) %>% 
+  ggplot(aes(county,death_per_crash_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatalities per Crash by County", x= "County", y= "Fatality per Crash")
+```
+
