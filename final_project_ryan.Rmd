@@ -109,3 +109,5 @@ bikes_new %>%
   ggplot(aes(county,death_per_crash_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatalities per Crash by County", x= "County", y= "Fatality per Crash")
 ```
 
+
+
