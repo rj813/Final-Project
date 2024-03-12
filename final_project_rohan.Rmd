@@ -23,11 +23,13 @@ bike_crashes <- read_csv("datatesting/data/bicycle-fatality-and-injury-data-by-c
 
 ```{r}
 bike_crashes$County <- as.factor(bike_crashes$County)
-str(bike_crashes)
+str(bike_crashes) #rohan
 ```
+
 ```{r}
-levels(bike_crashes$County)
+levels(bike_crashes$County) #rohan
 ```
+
 ```{r}
 # Created a data frame with the county names, latitudes, and longitudes using the help of ChatGPT
 county_data <- data.frame(
@@ -56,7 +58,7 @@ county_data <- data.frame(
 )
 
 # Print the data frame with county, latitude, and longitude
-print(county_data)
+print(county_data) #rohan
 ```
 
 # Which county has the highest fatality:crash ratio?
@@ -68,37 +70,31 @@ bike_crashes$fatality_ratio <- bike_crashes$Fatality / bike_crashes$Total
 county_highest_ratio <- bike_crashes$County[which.max(bike_crashes$fatality_ratio)]
 
 # Print the county with the highest fatality:crash ratio
-print(county_highest_ratio)
+print(county_highest_ratio) #rohan
 ```
 
 ```{r}
 clean_names(county_data)
 write.csv(county_data, "datatesting/data/county_data.csv", row.names = F) #kevin
 ```
+
 #What is the mean fatality rate among different types of streets?
 ```{r}
-mean_fatality <- bike_crashes %>%
-  group_by(street_type) %>%
-  summarise(mean_fatality_rate = mean(fatality_rate))
+# Calculate fatality rate for each type of street
+fatality_rate <- bike_crashes %>%
+  mutate(fatality_rate = Fatality / Total) %>%
+  group_by(`Highway Type`) %>%
+  summarise(mean_fatality_rate = mean(fatality_rate, na.rm = TRUE))
 
-# Create a bar plot
-ggplot(mean_fatality, aes(x = street_type, y = mean_fatality_rate)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
-  labs(title = "Mean Fatality Rate Among Types of Streets",
-       x = "Street Type",
-       y = "Mean Fatality Rate")
+# Create a bar plot with enhanced aesthetics
+ggplot(fatality_rate, aes(x = `Highway Type`, y = mean_fatality_rate)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(title = "Average Fatality Rate Among Types of Streets",
+       x = "Highway Type",
+       y = "Average Fatality Rate") +
+  theme_minimal() +  # Minimalistic theme
+  theme(
+    plot.title = element_text(hjust = 0.5),  # Centering the title
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better aesthetics
+  )
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
