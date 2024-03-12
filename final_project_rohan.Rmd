@@ -75,7 +75,19 @@ print(county_highest_ratio)
 clean_names(county_data)
 write.csv(county_data, "datatesting/data/county_data.csv", row.names = F) #kevin
 ```
+#What is the mean fatality rate among different types of streets?
+```{r}
+mean_fatality <- bike_crashes %>%
+  group_by(street_type) %>%
+  summarise(mean_fatality_rate = mean(fatality_rate))
 
+# Create a bar plot
+ggplot(mean_fatality, aes(x = street_type, y = mean_fatality_rate)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Mean Fatality Rate Among Types of Streets",
+       x = "Street Type",
+       y = "Mean Fatality Rate")
+```
 
 
 
