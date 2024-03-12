@@ -96,5 +96,5 @@ ggplot(fatality_rate, aes(x = `Highway Type`, y = mean_fatality_rate)) +
   theme(
     plot.title = element_text(hjust = 0.5),  # Centering the title
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better aesthetics
-  )
+  ) #rohan
 ```
