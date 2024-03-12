@@ -12,6 +12,7 @@ date: "2024-03-07"
 library(dplyr)
 library(tidyverse)
 library(janitor)
+library(ggplot2)
 ```
 
 ```{r}
@@ -73,11 +74,9 @@ bikes_new
 bikes_new %>% 
   group_by(highway_type) %>% 
   summarise(highest_injury_by_road = sum(injury)) %>% 
-    arrange(desc=T) %>% 
+  arrange(desc=T) %>% 
   filter(highway_type != "TOTAL") %>% 
-ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = .7) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries") + 
-  theme(axis.text.x = element_text(angle = 30, hjust = 1),
-        plot.title = element_text(size = 14))
+ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = .7) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries", theme_minimal()) 
 ```
 ## plot for highest bike fatality per capita
 ```{r}
