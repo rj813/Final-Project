@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(tidyverse)
 library(janitor)
+library(ggmap)
+library(ggplot2)
 ```
 
 ```{r}
@@ -62,5 +64,81 @@ bikes_new <- bikes_new %>%
 
 ```{r}
 bikes_new
+```
+
+```{r}
+bikes_capita <- bikes_new %>%
+  mutate(total_capita = total/pop, fatality_capita = fatality/pop, injury_capita = injury/pop) #capita counts
+view(bikes_capita)
+```
+
+
+```{r}
+ui <- fluidPage(
+    titlePanel("Bike Crash County Data on Map with ggmap"),
+    sidebarLayout(
+        sidebarPanel(
+            selectInput("sizeColumn", "Select Column for Dot Size", 
+                        choices = c("total", "fatality", "injury", "pop", "total_capita", "fatality_capita", "injury_capita"),
+                        selected = "total")
+        ),
+        mainPanel(
+            # Adjust the width and height as needed
+            plotOutput("mapPlot", width = "800px", height = "600px")
+        )
+    )
+)
+
+server <- function(input, output) {
+  output$mapPlot <- renderPlot({
+    # Define the base map; here we're using a simple world map. For more detailed maps, you would use get_map().
+    base_map <- ggplot() + borders("state", colour = "gray", fill = "white") +
+      theme_minimal() +
+      coord_fixed(ratio = 1.3) +
+      xlim(-124.48, -113.94) + ylim(32.53, 42.01) # These limits are approximate for California
+    
+    # Prepare the data for plotting
+    # Adjust the factor for dot size to fit your data's scale
+    data_for_plot <- bikes_capita %>%
+      mutate(size = get(input$sizeColumn) * 100) # You might need to adjust this scaling factor
+    
+    # Add points and text to the map
+    map <- base_map +
+      geom_point(data = data_for_plot, aes(x = longitude, y = latitude, size = size), alpha = 0.5) +
+      geom_text(data = data_for_plot, aes(x = longitude, y = latitude, label = county), vjust = -1, size = 1.75) +
+      labs(size = input$sizeColumn) # Dynamic label for dot size based on selection
+    
+    # Print the map
+    print(map)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+ui <- fluidPage(
+    selectInput("y", "Select Y Variable", choices = c("total", "fatality", "injury", "pop", "total_capita", "fatality_capita", "injury_capita"), 
+                selected = "total"),
+    plotOutput("plot", width = "500px", height = "400px") # Providing the size/aspect of the visual
+)
+
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    # Dynamically reorder the counties based on the selected variable in descending order
+    data_ordered <- bikes_capita %>%
+      mutate(county_reordered = reorder(county, get(input$y), FUN = function(x)-mean(x))) # Use -mean(x) for descending order
+
+    ggplot(data_ordered, aes(x = county_reordered, y = get(input$y))) + 
+      geom_bar(stat = "identity") + 
+      coord_flip() +
+      theme_light(base_size = 10) + # Set base theme
+      theme(axis.text.y = element_text(size = 7)) + # Adjust y-axis text size appropriately
+      labs(title = "County Bike Crash Data", y = input$y, x = "County") # Add plot and axis titles
+  })
+}
+
+shinyApp(ui, server)
+
 ```
 
