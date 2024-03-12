@@ -14,6 +14,7 @@ library(tidyverse)
 library(janitor)
 library(ggmap)
 library(ggplot2)
+library(maps)
 ```
 
 ```{r}
@@ -73,7 +74,7 @@ view(bikes_capita)
 ```
 
 
-```{r}
+```{r} #
 ui <- fluidPage(
     titlePanel("Bike Crash County Data on Map with ggmap"),
     sidebarLayout(
@@ -104,7 +105,7 @@ server <- function(input, output) {
     
     # Add points and text to the map
     map <- base_map +
-      geom_point(data = data_for_plot, aes(x = longitude, y = latitude, size = size), alpha = 0.5) +
+      geom_point(data = data_for_plot, aes(x = longitude, y = latitude, size = size)) +
       geom_text(data = data_for_plot, aes(x = longitude, y = latitude, label = county), vjust = -1, size = 1.75) +
       labs(size = input$sizeColumn) # Dynamic label for dot size based on selection
     
@@ -116,29 +117,33 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
-```{r}
+```{r} #
+
+
 ui <- fluidPage(
-    selectInput("y", "Select Y Variable", choices = c("total", "fatality", "injury", "pop", "total_capita", "fatality_capita", "injury_capita"), 
+    selectInput("y", "Select Y Variable", 
+                choices = c("total", "fatality", "injury", "pop", "total_capita", "fatality_capita", "injury_capita"), 
                 selected = "total"),
-    plotOutput("plot", width = "500px", height = "400px") # Providing the size/aspect of the visual
+    plotOutput("plot", width = "100%", height = "600px") # Use percentage for responsive width
 )
 
 server <- function(input, output) {
   output$plot <- renderPlot({
+
     # Dynamically reorder the counties based on the selected variable in descending order
     data_ordered <- bikes_capita %>%
-      mutate(county_reordered = reorder(county, get(input$y), FUN = function(x)-mean(x))) # Use -mean(x) for descending order
-
+      mutate(county_reordered = reorder(county, get(input$y), FUN = mean, decreasing = TRUE)) # Use decreasing = TRUE for descending order
+    
+    # Use the reordered data to plot
     ggplot(data_ordered, aes(x = county_reordered, y = get(input$y))) + 
-      geom_bar(stat = "identity") + 
+      geom_bar(stat = "identity", fill = "steelblue") + # Added fill color for bars
       coord_flip() +
       theme_light(base_size = 10) + # Set base theme
       theme(axis.text.y = element_text(size = 7)) + # Adjust y-axis text size appropriately
       labs(title = "County Bike Crash Data", y = input$y, x = "County") # Add plot and axis titles
   })
 }
-
 shinyApp(ui, server)
-
 ```
+
 

@@ -381,6 +381,19 @@ display: none;
 ## The following objects are masked from &#39;package:stats&#39;:
 ## 
 ##     chisq.test, fisher.test</code></pre>
+<pre class="r"><code>library(ggmap)</code></pre>
+<pre><code>## ℹ Google&#39;s Terms of Service: &lt;https://mapsplatform.google.com&gt;
+##   Stadia Maps&#39; Terms of Service: &lt;https://stadiamaps.com/terms-of-service/&gt;
+##   OpenStreetMap&#39;s Tile Usage Policy: &lt;https://operations.osmfoundation.org/policies/tiles/&gt;
+## ℹ Please cite ggmap if you use it! Use `citation(&quot;ggmap&quot;)` for details.</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(maps)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;maps&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     map</code></pre>
 <pre class="r"><code>bikes &lt;- read_csv(&quot;datatesting/data/bicycle-fatality-and-injury-data-by-county.csv&quot;)</code></pre>
 <pre><code>## Rows: 290 Columns: 5
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -506,6 +519,64 @@ display: none;
 ## 10 ALPINE  TOTAL                3        0      3     38.6     -120. Cali…  2022
 ## # ℹ 280 more rows
 ## # ℹ 1 more variable: pop &lt;dbl&gt;</code></pre>
+<pre class="r"><code>bikes_capita &lt;- bikes_new %&gt;%
+  mutate(total_capita = total/pop, fatality_capita = fatality/pop, injury_capita = injury/pop) #capita counts
+view(bikes_capita)</code></pre>
+<p>```{r} # ui &lt;- fluidPage( titlePanel(“Bike Crash County Data on
+Map with ggmap”), sidebarLayout( sidebarPanel( selectInput(“sizeColumn”,
+“Select Column for Dot Size”, choices = c(“total”, “fatality”, “injury”,
+“pop”, “total_capita”, “fatality_capita”, “injury_capita”), selected =
+“total”) ), mainPanel( # Adjust the width and height as needed
+plotOutput(“mapPlot”, width = “800px”, height = “600px”) ) ) )</p>
+<p>server &lt;- function(input, output) { output$mapPlot &lt;-
+renderPlot({ # Define the base map; here we’re using a simple world map.
+For more detailed maps, you would use get_map(). base_map &lt;- ggplot()
++ borders(“state”, colour = “gray”, fill = “white”) + theme_minimal() +
+coord_fixed(ratio = 1.3) + xlim(-124.48, -113.94) + ylim(32.53, 42.01) #
+These limits are approximate for California</p>
+<pre><code># Prepare the data for plotting
+# Adjust the factor for dot size to fit your data&#39;s scale
+data_for_plot &lt;- bikes_capita %&gt;%
+  mutate(size = get(input$sizeColumn) * 100) # You might need to adjust this scaling factor
+
+# Add points and text to the map
+map &lt;- base_map +
+  geom_point(data = data_for_plot, aes(x = longitude, y = latitude, size = size)) +
+  geom_text(data = data_for_plot, aes(x = longitude, y = latitude, label = county), vjust = -1, size = 1.75) +
+  labs(size = input$sizeColumn) # Dynamic label for dot size based on selection
+
+# Print the map
+print(map)</code></pre>
+<p>}) }</p>
+<p>shinyApp(ui, server)</p>
+<pre><code>
+```{r} #
+
+
+ui &lt;- fluidPage(
+    selectInput(&quot;y&quot;, &quot;Select Y Variable&quot;, 
+                choices = c(&quot;total&quot;, &quot;fatality&quot;, &quot;injury&quot;, &quot;pop&quot;, &quot;total_capita&quot;, &quot;fatality_capita&quot;, &quot;injury_capita&quot;), 
+                selected = &quot;total&quot;),
+    plotOutput(&quot;plot&quot;, width = &quot;100%&quot;, height = &quot;600px&quot;) # Use percentage for responsive width
+)
+
+server &lt;- function(input, output) {
+  output$plot &lt;- renderPlot({
+
+    # Dynamically reorder the counties based on the selected variable in descending order
+    data_ordered &lt;- bikes_capita %&gt;%
+      mutate(county_reordered = reorder(county, get(input$y), FUN = mean, decreasing = TRUE)) # Use decreasing = TRUE for descending order
+    
+    # Use the reordered data to plot
+    ggplot(data_ordered, aes(x = county_reordered, y = get(input$y))) + 
+      geom_bar(stat = &quot;identity&quot;, fill = &quot;steelblue&quot;) + # Added fill color for bars
+      coord_flip() +
+      theme_light(base_size = 10) + # Set base theme
+      theme(axis.text.y = element_text(size = 7)) + # Adjust y-axis text size appropriately
+      labs(title = &quot;County Bike Crash Data&quot;, y = input$y, x = &quot;County&quot;) # Add plot and axis titles
+  })
+}
+shinyApp(ui, server)</code></pre>
 
 
 
