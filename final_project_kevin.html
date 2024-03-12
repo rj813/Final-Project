@@ -394,6 +394,7 @@ library(maps)</code></pre>
 ## The following object is masked from &#39;package:purrr&#39;:
 ## 
 ##     map</code></pre>
+<pre class="r"><code>library(shiny)</code></pre>
 <pre class="r"><code>bikes &lt;- read_csv(&quot;datatesting/data/bicycle-fatality-and-injury-data-by-county.csv&quot;)</code></pre>
 <pre><code>## Rows: 290 Columns: 5
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -522,12 +523,13 @@ library(maps)</code></pre>
 <pre class="r"><code>bikes_capita &lt;- bikes_new %&gt;%
   mutate(total_capita = total/pop, fatality_capita = fatality/pop, injury_capita = injury/pop) #capita counts
 view(bikes_capita)</code></pre>
-<p>```{r} # ui &lt;- fluidPage( titlePanel(“Bike Crash County Data on
-Map with ggmap”), sidebarLayout( sidebarPanel( selectInput(“sizeColumn”,
-“Select Column for Dot Size”, choices = c(“total”, “fatality”, “injury”,
-“pop”, “total_capita”, “fatality_capita”, “injury_capita”), selected =
-“total”) ), mainPanel( # Adjust the width and height as needed
-plotOutput(“mapPlot”, width = “800px”, height = “600px”) ) ) )</p>
+<p>```{r} # ui &lt;- fluidPage( titlePanel(“Bike Crash Data in
+California by County”), sidebarLayout( sidebarPanel(
+selectInput(“sizeColumn”, “Select Column for Dot Size”, choices =
+c(“total”, “fatality”, “injury”, “pop”, “total_capita”,
+“fatality_capita”, “injury_capita”), selected = “total”) ), mainPanel( #
+Adjust the width and height as needed plotOutput(“mapPlot”, width =
+“800px”, height = “600px”) ) ) )</p>
 <p>server &lt;- function(input, output) { output$mapPlot &lt;-
 renderPlot({ # Define the base map; here we’re using a simple world map.
 For more detailed maps, you would use get_map(). base_map &lt;- ggplot()
