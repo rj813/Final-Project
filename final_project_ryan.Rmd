@@ -12,7 +12,10 @@ date: "2024-03-07"
 library(dplyr)
 library(tidyverse)
 library(janitor)
-library(ggplot2)
+library(shiny)
+#install.packages("ggmap")
+library(ggmap)
+library(RColorBrewer)
 ```
 
 ```{r}
@@ -74,9 +77,11 @@ bikes_new
 bikes_new %>% 
   group_by(highway_type) %>% 
   summarise(highest_injury_by_road = sum(injury)) %>% 
-  arrange(desc=T) %>% 
+    arrange(desc=T) %>% 
   filter(highway_type != "TOTAL") %>% 
-ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = .7) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries", theme_minimal()) 
+ggplot(aes(highway_type, highest_injury_by_road, fill = highway_type)) + geom_col(alpha = 1) + labs(title = "Injuries by Highway Type", x = "Highway Type", y= "Injuries") + 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        plot.title = element_text(size = 14)) + scale_fill_brewer(palette = "Purples")
 ```
 ## plot for highest bike fatality per capita
 ```{r}
@@ -85,7 +90,7 @@ bikes_new %>%
   arrange(desc(death_per_cap)) %>% 
   filter(highway_type == "TOTAL") %>% 
   head(death_per_cap, n=5) %>% 
- ggplot(aes(county,death_per_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatality per Capita by County", x= "County", y= "Fatality per Capita")
+ ggplot(aes(county,death_per_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatality per Capita by County", x= "County", y= "Fatality per Capita")+ scale_fill_brewer(palette = "YlGnBu")
 ```
 ## highest crash rate per county
 ```{r}
@@ -94,7 +99,7 @@ bikes_new %>%
   arrange(desc(total_per_cap)) %>% 
   filter(highway_type == "TOTAL") %>% 
   head(total_per_cap, n=5) %>% 
- ggplot(aes(county,total_per_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Crashes per Capita by County", x= "County", y= "Crashes per Capita")
+ ggplot(aes(county,total_per_cap, fill = county)) +geom_col(alpha = 1) + labs(title = "Crashes per Capita by County", x= "County", y= "Crashes per Capita")+ scale_fill_brewer(palette = "BuGn")
 ```
 
 ### highest fatality per crash by county
@@ -107,8 +112,22 @@ bikes_new %>%
   arrange(desc(death_per_crash_cap)) %>% 
   filter(highway_type == "TOTAL") %>% 
   head(death_per_crash_cap, n=5) %>% 
-  ggplot(aes(county,death_per_crash_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatalities per Crash by County", x= "County", y= "Fatality per Crash")
+  ggplot(aes(county,death_per_crash_cap, fill = county)) +geom_col(alpha = .7) + labs(title = "Fatalities per Crash by County", x= "County", y= "Fatality per Crash") + coord_flip() + scale_fill_brewer(palette = "Blues")
+```
+```{r}
+bikes_new %>% 
+  filter(highway_type == "TOTAL") %>% 
+  filter(pop > 10000) %>% 
+  ggplot(aes(pop, total)) + geom_point(color = "purple", alpha = .6) + scale_x_log10() + geom_smooth(method = "lm", color = "lavender") + labs(title = "Crashes by Population", x = "Population", y= "Crashes")
 ```
 
 
+
+```{r}
+bikes_new %>% 
+  filter(county== "YOLO") %>% 
+mutate(total_per_cap = total/pop) %>% 
+  mutate(death_per_cap = fatality/pop) %>% 
+  mutate(death_per_crash_cap = death_per_cap/total_per_cap)
+```
 
