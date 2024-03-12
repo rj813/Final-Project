@@ -1,5 +1,5 @@
 ---
-title: "County Coordinate Data"
+title: "county Coordinate Data"
 output: html_document
 date: "2024-03-05"
 ---
@@ -18,17 +18,55 @@ library(shinydashboard)
 ```
 
 ```{r}
-bike_crashes <- read_csv("datatesting/data/bicycle-fatality-and-injury-data-by-county.csv") #bike injury data, part of vehicle crash data set
+bikes <- read_csv("datatesting/data/bicycle-fatality-and-injury-data-by-county.csv")
+bikes <- clean_names(bikes) #names were upper case before
 ```
 
 ```{r}
-bike_crashes$County <- as.factor(bike_crashes$County)
-str(bike_crashes) #rohan
+county_data <- read_csv("datatesting/data/county_data.csv")
+```
+```{r}
+county_data
+```
+```{r}
+bikes
 ```
 
 ```{r}
-levels(bike_crashes$County) #rohan
+bikes_new <- full_join(bikes, county_data)
 ```
+```{r}
+pop <- read_csv("datatesting/data/county_populations.csv")
+```
+```{r}
+pop #found that county names do not match so asked chatgpt to fix county names
+```
+
+```{r}
+updated_pop <- read_csv("datatesting/data/updated_county_populations.csv")
+```
+```{r}
+updated_pop <- updated_pop %>%
+  filter(county != "CALIFORNIA") #data has total pop which we dont need
+```
+
+```{r}
+bikes_new <- full_join(bikes_new, updated_pop)
+```
+```{r}
+bikes_new #population and year names are wrong
+```
+
+```{r}
+bikes_new <- bikes_new %>%
+  rename(year ="population")%>%
+  rename(pop = "population.1")
+```
+
+```{r}
+bikes_new
+```
+
 
 ```{r}
 # Created a data frame with the county names, latitudes, and longitudes using the help of ChatGPT
@@ -61,40 +99,153 @@ county_data <- data.frame(
 print(county_data) #rohan
 ```
 
-# Which county has the highest fatality:crash ratio?
-```{r}
-# Calculate the fatality to crash ratio
-bike_crashes$fatality_ratio <- bike_crashes$Fatality / bike_crashes$Total
-
-# Find the county with the highest fatality:crash ratio
-county_highest_ratio <- bike_crashes$County[which.max(bike_crashes$fatality_ratio)]
-
-# Print the county with the highest fatality:crash ratio
-print(county_highest_ratio) #rohan
-```
-
 ```{r}
 clean_names(county_data)
 write.csv(county_data, "datatesting/data/county_data.csv", row.names = F) #kevin
 ```
 
+#Which counties have the highest fatality rates?
+```{r}
+# Calculate fatality ratio
+bikes_new <- bikes_new %>%
+  mutate(fatality_ratio = fatality / total)
+
+# Filter out rows with NA values in fatality_ratio
+bikes_filtered <- bikes_new %>%
+  filter(!is.na(fatality_ratio))
+
+# Select the top N counties with the highest fatality ratios
+top_counties <- bikes_filtered %>%
+  top_n(n = 6, wt = fatality_ratio)  # Select top 6 counties; adjust "n" as needed
+
+# Create a color palette with a unique color for each county
+county_colors <- viridis::viridis(nrow(top_counties))
+
+# Create a bar plot of fatality to crash ratios for the top N counties
+ggplot(top_counties, aes(x = reorder(county, fatality_ratio), y = fatality_ratio, fill = county)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = county_colors) +  # Assign unique colors to each county
+  labs(title = "Top 5 Counties with Highest Fatality to Crash Ratio",
+       x = "County",
+       y = "Fatality to Crash Ratio") +
+  theme_minimal() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8))  # Adjust angle and size of x-axis labels 
+
+```
+
 #What is the mean fatality rate among different types of streets?
 ```{r}
+# Filter out "One way street" and "Expressway" categories
+bikes_filtered <- bikes_new %>%
+  filter(highway_type != "total" & highway_type != "One-Way City Street" & highway_type != "Expressway")
+
 # Calculate fatality rate for each type of street
-fatality_rate <- bike_crashes %>%
-  mutate(fatality_rate = Fatality / Total) %>%
-  group_by(`Highway Type`) %>%
+fatality_rate <- bikes_filtered %>%
+  mutate(fatality_rate = fatality / total * 100) %>%
+  group_by(highway_type) %>%
   summarise(mean_fatality_rate = mean(fatality_rate, na.rm = TRUE))
 
+# Define a colorful palette
+color_palette <- RColorBrewer::brewer.pal(8, "Set2")  # Using the "Set3" palette with 8 colors
+
 # Create a bar plot with enhanced aesthetics
-ggplot(fatality_rate, aes(x = `Highway Type`, y = mean_fatality_rate)) +
-  geom_bar(stat = "identity", fill = "red") +
+ggplot(fatality_rate, aes(x = reorder(highway_type, mean_fatality_rate), y = mean_fatality_rate, fill = highway_type)) +
+  geom_bar(stat = "identity", width = 0.6) +  # Adjusted width
+  scale_fill_manual(values = color_palette) +  # Apply custom color palette
   labs(title = "Average Fatality Rate Among Types of Streets",
-       x = "Highway Type",
-       y = "Average Fatality Rate") +
+       x = NULL,  # Remove x-axis label
+       y = "Average Fatality Rate (%)") +
   theme_minimal() +  # Minimalistic theme
   theme(
-    plot.title = element_text(hjust = 0.5),  # Centering the title
-    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better aesthetics
-  ) #rohan
+    plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),  # Larger title font size and adjusted margin
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),  # Adjusted x-axis text size, angle, and position
+    axis.text.y = element_text(size = 12),  # Adjusted y-axis text size
+    axis.title.y = element_text(size = 14, margin = margin(t = 0, r = 10)),  # Adjusted y-axis title size and margin
+    axis.line = element_blank(),  # Remove axis lines
+    panel.grid.major = element_blank(),  # Remove major gridlines
+    panel.grid.minor = element_blank(),  # Remove minor gridlines
+    panel.background = element_blank(),  # Remove panel background
+    panel.border = element_rect(color = "black", fill = NA, size = 0.5)  # Add border around plot
+  ) +
+  coord_flip()  # Flip coordinates for horizontal bars
+
 ```
+
+#How do fatality and injury rates compare among different types of streets?
+```{r}
+# Define UI for application
+ui <- fluidPage(
+  titlePanel("Bike Crashes Analysis"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("rate_type", "Select Rate Type:",
+                  choices = c("fatality Rate", "injury Rate"),
+                  selected = "fatality Rate")
+    ),
+    
+    mainPanel(
+      plotOutput("plot")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output) {
+  
+  # Create a boxplot
+  output$plot <- renderPlot({
+    # Define custom color palette
+    colors <- rainbow(length(unique(bikes_new$highway_type)))
+    
+    if (input$rate_type == "fatality Rate") {
+      data <- bikes_new %>%
+        filter(highway_type != "total") %>%
+        mutate(rate = fatality / total)
+      
+      ylab <- "fatality Rate (%)"
+    } else {
+      data <- bikes_new %>%
+        filter(highway_type != "total") %>%
+        mutate(rate = injury / total)
+      
+      ylab <- "injury Rate (%)"
+    }
+    
+    ggplot(data, aes(x = reorder(highway_type, rate), y = rate, fill = highway_type)) +
+      geom_boxplot(outlier.colour = "black", outlier.shape = 1, width = 0.5) +  # Use boxplot geometry with specified aesthetics for outliers
+      scale_fill_manual(values = colors) +  # Apply custom color palette
+      labs(title = paste(input$rate_type, "Among Types of Streets"),
+           x = NULL,
+           y = ylab) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),
+        axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14, margin = margin(t = 0, r = 10)),
+        axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA, size = 0.5)
+      )
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
+```
+
+
+
+
+
+
+
+
+
+
+
+

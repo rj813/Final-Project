@@ -8,7 +8,7 @@
 ## Make an injury map (KEVIN)
 ## Which county has highest bike crash per CAP? (RYAN)
 ## Which county has highest fatalities per CAP?  (RYAN)
-
+## Is there a correlation between population size and fatalities?
 
 Notes: -dot size for each county per total (Density), an app for a map by injury types and highway type.
 
