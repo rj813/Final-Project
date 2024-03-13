@@ -126,8 +126,10 @@ bikes_new %>%
 ```{r}
 bikes_new %>% 
   filter(county== "YOLO") %>% 
+  filter(total != 0) %>% 
 mutate(total_per_cap = total/pop) %>% 
   mutate(death_per_cap = fatality/pop) %>% 
   mutate(death_per_crash_cap = death_per_cap/total_per_cap)
 ```
+
 
