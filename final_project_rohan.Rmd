@@ -136,112 +136,62 @@ ggplot(top_counties, aes(x = reorder(county, fatality_ratio), y = fatality_ratio
 
 #What is the mean fatality rate among different types of streets?
 ```{r}
-# Filter out "One way street" and "Expressway" categories
 bikes_filtered <- bikes_new %>%
-  filter(highway_type != "total" & highway_type != "One-Way City Street" & highway_type != "Expressway")
+  filter(highway_type != "TOTAL")
 
-# Calculate fatality rate for each type of street
 fatality_rate <- bikes_filtered %>%
   mutate(fatality_rate = fatality / total * 100) %>%
   group_by(highway_type) %>%
   summarise(mean_fatality_rate = mean(fatality_rate, na.rm = TRUE))
 
-# Define a colorful palette
-color_palette <- RColorBrewer::brewer.pal(8, "Set2")  # Using the "Set3" palette with 8 colors
+color_palette <- RColorBrewer::brewer.pal(8, "Set2")
 
-# Create a bar plot with enhanced aesthetics
 ggplot(fatality_rate, aes(x = reorder(highway_type, mean_fatality_rate), y = mean_fatality_rate, fill = highway_type)) +
-  geom_bar(stat = "identity", width = 0.6) +  # Adjusted width
-  scale_fill_manual(values = color_palette) +  # Apply custom color palette
+  geom_bar(stat = "identity", width = 0.6) +  
+  scale_fill_manual(values = color_palette, name = "Highway Type") +  # Set legend name
   labs(title = "Average Fatality Rate Among Types of Streets",
-       x = NULL,  # Remove x-axis label
+       x = NULL,  
        y = "Average Fatality Rate (%)") +
-  theme_minimal() +  # Minimalistic theme
+  theme_minimal() +  
   theme(
-    plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),  # Larger title font size and adjusted margin
-    axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),  # Adjusted x-axis text size, angle, and position
-    axis.text.y = element_text(size = 12),  # Adjusted y-axis text size
-    axis.title.y = element_text(size = 14, margin = margin(t = 0, r = 10)),  # Adjusted y-axis title size and margin
-    axis.line = element_blank(),  # Remove axis lines
-    panel.grid.major = element_blank(),  # Remove major gridlines
-    panel.grid.minor = element_blank(),  # Remove minor gridlines
-    panel.background = element_blank(),  # Remove panel background
+    plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)), 
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),  
+    axis.text.y = element_text(size = 12),  
+    axis.title.y = element_text(size = 14, margin = margin(t = 0, r = 10)),  
+    axis.line = element_blank(),  
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    panel.background = element_blank(),  
+    panel.border = element_rect(color = "black", fill = NA, size = 0.5) 
+  ) +
+  coord_flip()  
+```
+
+## Is there a correlation between population size and fatalities? (ROHAN) 
+```{r}
+options(scipen = 999)
+
+bikes_new %>%
+  mutate(fatality_rate = fatality / total * 100) %>%
+  filter(fatality_rate != 0) %>%
+  ggplot(aes(x = pop, y = fatality_rate)) +
+  geom_point(color = "blue", size = 2) +  # Scatter plot with blue points
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed", size = 0.85) +  # Add red dashed linear regression line
+  labs(title = "Correlation between Population Size and Fatality Rate",
+       x = "Population",
+       y = "Fatality Rate (%)") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),  # Larger title font size and centered title
+    axis.title = element_text(size = 14),  # Adjusted axis title size
+    axis.text = element_text(size = 12),  # Adjusted axis text size
+    legend.title = element_text(size = 14),  # Adjusted legend title size
+    legend.text = element_text(size = 12),  # Adjusted legend text size
     panel.border = element_rect(color = "black", fill = NA, size = 0.5)  # Add border around plot
   ) +
-  coord_flip()  # Flip coordinates for horizontal bars
+  scale_x_log10()
 
 ```
-
-#How do fatality and injury rates compare among different types of streets?
-```{r}
-# Define UI for application
-ui <- fluidPage(
-  titlePanel("Bike Crashes Analysis"),
-  
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("rate_type", "Select Rate Type:",
-                  choices = c("fatality Rate", "injury Rate"),
-                  selected = "fatality Rate")
-    ),
-    
-    mainPanel(
-      plotOutput("plot")
-    )
-  )
-)
-
-# Define server logic
-server <- function(input, output) {
-  
-  # Create a boxplot
-  output$plot <- renderPlot({
-    # Define custom color palette
-    colors <- rainbow(length(unique(bikes_new$highway_type)))
-    
-    if (input$rate_type == "fatality Rate") {
-      data <- bikes_new %>%
-        filter(highway_type != "total") %>%
-        mutate(rate = fatality / total)
-      
-      ylab <- "fatality Rate (%)"
-    } else {
-      data <- bikes_new %>%
-        filter(highway_type != "total") %>%
-        mutate(rate = injury / total)
-      
-      ylab <- "injury Rate (%)"
-    }
-    
-    ggplot(data, aes(x = reorder(highway_type, rate), y = rate, fill = highway_type)) +
-      geom_boxplot(outlier.colour = "black", outlier.shape = 1, width = 0.5) +  # Use boxplot geometry with specified aesthetics for outliers
-      scale_fill_manual(values = colors) +  # Apply custom color palette
-      labs(title = paste(input$rate_type, "Among Types of Streets"),
-           x = NULL,
-           y = ylab) +
-      theme_minimal() +
-      theme(
-        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),
-        axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),
-        axis.text.y = element_text(size = 12),
-        axis.title.y = element_text(size = 14, margin = margin(t = 0, r = 10)),
-        axis.line = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        panel.border = element_rect(color = "black", fill = NA, size = 0.5)
-      )
-  })
-}
-
-# Run the application
-shinyApp(ui = ui, server = server)
-```
-
-
-
-
-
 
 
 
