@@ -13,8 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggplot2)
 library(janitor)
-library(shiny)
-library(shinydashboard)
 ```
 
 ```{r}
@@ -67,9 +65,8 @@ bikes_new <- bikes_new %>%
 bikes_new
 ```
 
-
+#Created a data frame with the county names, latitudes, and longitudes using the help of ChatGPT
 ```{r}
-# Created a data frame with the county names, latitudes, and longitudes using the help of ChatGPT
 county_data <- data.frame(
   county = c("ALAMEDA", "ALPINE", "AMADOR", "BUTTE", "CALAVERAS", "COLUSA", "CONTRA COSTA", "DEL NORTE",
              "EL DORADO", "FRESNO", "GLENN", "HUMBOLDT", "IMPERIAL", "INYO", "KERN", "KINGS",
@@ -95,8 +92,7 @@ county_data <- data.frame(
                 -122.9888, -120.9876, -121.3153, -122.2345, -123.089, -118.8597, -120.2602, -119.1391, -121.9018, -121.3999)
 )
 
-# Print the data frame with county, latitude, and longitude
-print(county_data) #rohan
+#rohan
 ```
 
 ```{r}
@@ -106,31 +102,31 @@ write.csv(county_data, "datatesting/data/county_data.csv", row.names = F) #kevin
 
 #Which counties have the highest fatality rates?
 ```{r}
-# Calculate fatality ratio
+
 bikes_new <- bikes_new %>%
   mutate(fatality_ratio = fatality / total)
 
-# Filter out rows with NA values in fatality_ratio
+
 bikes_filtered <- bikes_new %>%
   filter(!is.na(fatality_ratio))
 
-# Select the top N counties with the highest fatality ratios
+
 top_counties <- bikes_filtered %>%
   top_n(n = 6, wt = fatality_ratio)  # Select top 6 counties; adjust "n" as needed
 
-# Create a color palette with a unique color for each county
+
 county_colors <- viridis::viridis(nrow(top_counties))
 
-# Create a bar plot of fatality to crash ratios for the top N counties
+
 ggplot(top_counties, aes(x = reorder(county, fatality_ratio), y = fatality_ratio, fill = county)) +
   geom_bar(stat = "identity") +
-  scale_fill_manual(values = county_colors) +  # Assign unique colors to each county
+  scale_fill_manual(values = county_colors) + 
   labs(title = "Top 5 Counties with Highest Fatality to Crash Ratio",
        x = "County",
        y = "Fatality to Crash Ratio") +
   theme_minimal() +
   coord_flip() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8))  # Adjust angle and size of x-axis labels 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8))  
 
 ```
 
@@ -148,7 +144,7 @@ color_palette <- RColorBrewer::brewer.pal(8, "Set2")
 
 ggplot(fatality_rate, aes(x = reorder(highway_type, mean_fatality_rate), y = mean_fatality_rate, fill = highway_type)) +
   geom_bar(stat = "identity", width = 0.6) +  
-  scale_fill_manual(values = color_palette, name = "Highway Type") +  # Set legend name
+  scale_fill_manual(values = color_palette, name = "Highway Type") +  
   labs(title = "Average Fatality Rate Among Types of Streets",
        x = NULL,  
        y = "Average Fatality Rate (%)") +
@@ -175,19 +171,19 @@ bikes_new %>%
   mutate(fatality_rate = fatality / total * 100) %>%
   filter(fatality_rate != 0) %>%
   ggplot(aes(x = pop, y = fatality_rate)) +
-  geom_point(color = "blue", size = 2) +  # Scatter plot with blue points
-  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed", size = 0.85) +  # Add red dashed linear regression line
+  geom_point(color = "blue", size = 2) +  
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed", size = 0.85) + 
   labs(title = "Correlation between Population Size and Fatality Rate",
        x = "Population",
        y = "Fatality Rate (%)") +
   theme_minimal() +
   theme(
-    plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),  # Larger title font size and centered title
-    axis.title = element_text(size = 14),  # Adjusted axis title size
-    axis.text = element_text(size = 12),  # Adjusted axis text size
-    legend.title = element_text(size = 14),  # Adjusted legend title size
-    legend.text = element_text(size = 12),  # Adjusted legend text size
-    panel.border = element_rect(color = "black", fill = NA, size = 0.5)  # Add border around plot
+    plot.title = element_text(size = 20, hjust = 0.5, margin = margin(b = 20)),  
+    axis.title = element_text(size = 14),  
+    axis.text = element_text(size = 12),  
+    legend.title = element_text(size = 14), 
+    legend.text = element_text(size = 12), 
+    panel.border = element_rect(color = "black", fill = NA, size = 0.5)  
   ) +
   scale_x_log10()
 
